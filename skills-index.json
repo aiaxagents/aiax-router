@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T00:00:00Z",
+  "sources": [
+    {
+      "name": "hand-seeded-v0",
+      "note": "Hand-curated starter set; the weekly skills workflow refreshes this file by pull request. Ratings are editor estimates, 1-10."
+    }
+  ],
+  "skills": [
+    {
+      "id": "docx",
+      "name": "Word documents",
+      "repo": "https://github.com/anthropics/skills",
+      "path": "skills/docx",
+      "categories": ["writing"],
+      "taskHints": ["word", "docx", "document"],
+      "rating": 9
+    },
+    {
+      "id": "pdf",
+      "name": "PDF handling",
+      "repo": "https://github.com/anthropics/skills",
+      "path": "skills/pdf",
+      "categories": ["writing", "long-context"],
+      "taskHints": ["pdf"],
+      "rating": 9
+    },
+    {
+      "id": "pptx",
+      "name": "Presentations",
+      "repo": "https://github.com/anthropics/skills",
+      "path": "skills/pptx",
+      "categories": ["writing"],
+      "taskHints": ["slides", "presentation", "pptx", "deck"],
+      "rating": 8
+    },
+    {
+      "id": "xlsx",
+      "name": "Spreadsheets",
+      "repo": "https://github.com/anthropics/skills",
+      "path": "skills/xlsx",
+      "categories": ["coding", "reasoning"],
+      "taskHints": ["spreadsheet", "excel", "xlsx", "csv"],
+      "rating": 9
+    },
+    {
+      "id": "test-driven-development",
+      "name": "Test-driven development",
+      "repo": "https://github.com/obra/superpowers",
+      "path": "skills/test-driven-development",
+      "categories": ["coding", "agentic-coding"],
+      "taskHints": ["test", "tdd", "bug", "fix"],
+      "rating": 8
+    },
+    {
+      "id": "systematic-debugging",
+      "name": "Systematic debugging",
+      "repo": "https://github.com/obra/superpowers",
+      "path": "skills/systematic-debugging",
+      "categories": ["coding", "agentic-coding"],
+      "taskHints": ["debug", "crash", "error", "root cause"],
+      "rating": 8
+    }
+  ]
+}

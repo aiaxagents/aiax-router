@@ -1,0 +1,53 @@
+{
+  "name": "aiax-router",
+  "version": "0.1.0",
+  "description": "Local-first router that gets the best out of the AI subscriptions you already pay for. Picks the right model, reasoning effort and skills for every task, by ROI.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "aiax-router": "dist/cli/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:scripts": "tsc -p tsconfig.scripts.json",
+    "update-table": "node dist-scripts/build-routing-table.js",
+    "test": "vitest run",
+    "dev": "tsc -p tsconfig.json --watch",
+    "ui:install": "npm --prefix web-ui install",
+    "ui:build": "npm --prefix web-ui install && npm --prefix web-ui run build",
+    "ui:dev": "npm --prefix web-ui run dev",
+    "sidecar:build": "node scripts/build-sidecar.mjs",
+    "app:prepare": "npm run build && npm run ui:build && npm run sidecar:build",
+    "app:dev": "tauri dev",
+    "app:build": "tauri build",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.28.1",
+    "postject": "1.0.0-alpha.6",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiaxagents/aiax-router"
+  },
+  "homepage": "https://aiaxrouter.com",
+  "bugs": "https://github.com/aiaxagents/aiax-router/issues",
+  "author": "AiAx AS",
+  "keywords": [
+    "llm",
+    "router",
+    "claude",
+    "codex",
+    "grok",
+    "kimi",
+    "subscriptions",
+    "agents"
+  ]
+}

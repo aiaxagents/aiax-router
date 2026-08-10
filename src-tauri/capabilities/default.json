@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The board is served over loopback and talks to the server with plain HTTP, so the page needs no Tauri commands at all. Only the local starting screen is in scope here.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

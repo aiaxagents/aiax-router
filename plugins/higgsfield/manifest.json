@@ -1,0 +1,12 @@
+{
+  "id": "higgsfield",
+  "name": "Higgsfield",
+  "kind": "media",
+  "label": "Video",
+  "does": "Makes short videos from a prompt or picture.",
+  "capabilities": ["image", "video", "avatar-ads", "product-shots"],
+  "pricingUrl": "https://higgsfield.ai/pricing",
+  "keyEnv": "HIGGSFIELD_API_KEY",
+  "metered": true,
+  "note": "You buy this directly from Higgsfield and paste your key in Settings. It is billed per use by them, separate from your AI subscriptions."
+}

@@ -1,0 +1,19 @@
+{
+  "_comment": "Hand-curated. Benchmark leaderboards publish long marketing names; the CLIs take short ids. The weekly benchmark pipeline lists every unmapped leaderboard model in its PR description instead of guessing a mapping, so a wrong alias never enters the routing table silently. One rule beyond that: an alias may only name the generation the CLI id resolves to today. `opus`, `sonnet` and `haiku` float to the current model, so a previous-generation benchmark row (claude-opus-4-6, grok-4) must not be aliased onto them - it would average a retired model into the score of the one the router actually spawns. Stale generations belong on the PR checklist, not in here.",
+  "aliases": {
+    "claude-opus-5-max": { "provider": "claude", "model": "opus" },
+    "claude-opus-5-high": { "provider": "claude", "model": "opus" },
+    "claude-opus-5-max-effort": { "provider": "claude", "model": "opus" },
+    "claude-sonnet-5-high": { "provider": "claude", "model": "sonnet" },
+    "claude-sonnet-5-xhigh-effort": { "provider": "claude", "model": "sonnet" },
+    "gpt-5.6-sol-high": { "provider": "codex", "model": "gpt-5.6-sol" },
+    "gpt-5.6-sol-xhigh": { "provider": "codex", "model": "gpt-5.6-sol" },
+    "gpt-5.6-sol-max": { "provider": "codex", "model": "gpt-5.6-sol" },
+    "gpt-5.5": { "provider": "codex", "model": "gpt-5.5" },
+    "gpt-5.5-high": { "provider": "codex", "model": "gpt-5.5" },
+    "gpt-5.5-xhigh": { "provider": "codex", "model": "gpt-5.5" },
+    "grok-4.5": { "provider": "grok", "model": "grok-4.5" },
+    "kimi-k3": { "provider": "kimi", "model": "kimi-k3" },
+    "kimi-k3-instruct": { "provider": "kimi", "model": "kimi-k3" }
+  }
+}

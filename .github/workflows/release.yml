@@ -1,0 +1,130 @@
+name: Release
+
+# Tag a version and the desktop app is built for every platform we ship.
+#   git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  app:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            args: --target x86_64-apple-darwin
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            args: --target x86_64-pc-windows-msvc
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            args: --target x86_64-unknown-linux-gnu
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # webkit2gtk 4.1 is Tauri v2; ayatana-appindicator and librsvg are what
+      # the AppImage packager links against. libappindicator3-dev conflicts
+      # with the ayatana variant on jammy, so only ayatana is installed.
+      - name: Linux build dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            librsvg2-dev \
+            patchelf \
+            build-essential \
+            file \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+          key: ${{ matrix.target }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # The official Node build, which matters twice over: single executable
+      # applications are disabled in shared-library builds, and this is also the
+      # Node the sidecar is carved out of.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm test
+
+      - uses: tauri-apps/tauri-action@v0
+        id: tauri
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # `tauri build` runs app:prepare, which builds the sidecar. Without
+          # this it would be carved out of the runner's own Node, which is the
+          # wrong architecture for the cross builds.
+          AIAX_TARGET_TRIPLE: ${{ matrix.target }}
+        with:
+          projectPath: .
+          tauriScript: pnpm tauri
+          includeUpdaterJson: false
+          tagName: ${{ github.ref_name }}
+          releaseName: AiAx Router ${{ github.ref_name }}
+          releaseBody: |
+            Local-first router for the AI subscriptions you already pay for.
+            Everything runs on your own machine.
+
+            The macOS and Windows builds are unsigned, so the first launch needs
+            the usual "open anyway" step.
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      # aiaxrouter.com's download buttons point at stable names under
+      # releases/latest/download/. Upload a stable-named copy of the headline
+      # artifact per platform; the versioned originals stay alongside.
+      - name: Upload stable-named dmg (Apple silicon)
+        if: matrix.target == 'aarch64-apple-darwin'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          src=$(ls src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg | head -n1)
+          curl -sSf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"$src" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.tauri.outputs.releaseId }}/assets?name=AiAx-Router.dmg" > /dev/null
+
+      - name: Upload stable-named setup exe (Windows)
+        if: matrix.target == 'x86_64-pc-windows-msvc'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          src=$(ls src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe | head -n1)
+          curl -sSf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"$src" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.tauri.outputs.releaseId }}/assets?name=AiAx-Router-Setup.exe" > /dev/null

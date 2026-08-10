@@ -1,0 +1,28 @@
+{
+  "id": "analyst",
+  "name": "Analyst",
+  "order": 4,
+  "icon": "chart",
+  "avatar": "avatar-analyst.png",
+  "tagline": "Works with numbers and spreadsheets.",
+  "placeholder": "Say which numbers you want looked at.",
+  "hints": {
+    "category": "reasoning"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "subscription",
+          "id": "claude",
+          "name": "Claude"
+        },
+        {
+          "kind": "subscription",
+          "id": "codex",
+          "name": "ChatGPT"
+        }
+      ]
+    }
+  ]
+}

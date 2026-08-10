@@ -1,0 +1,37 @@
+{
+  "id": "designer",
+  "name": "Designer",
+  "order": 6,
+  "icon": "layout",
+  "avatar": "avatar-designer.png",
+  "tagline": "Makes pages and presentations.",
+  "placeholder": "Say what you want designed.",
+  "hints": {
+    "category": "coding"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "any-subscription",
+          "name": "Any subscription"
+        }
+      ]
+    },
+    {
+      "any": [
+        {
+          "kind": "plugin",
+          "id": "fal",
+          "name": "Fal.ai"
+        },
+        {
+          "kind": "plugin",
+          "id": "kie",
+          "name": "Kie.ai"
+        }
+      ]
+    }
+  ],
+  "hint": "Connect Fal.ai or Kie.ai to use this one."
+}

@@ -1,0 +1,28 @@
+{
+  "id": "writer",
+  "name": "Writer",
+  "order": 1,
+  "icon": "pen",
+  "avatar": "avatar-writer.png",
+  "tagline": "Writes reports, posts and letters.",
+  "placeholder": "Say what you want written.",
+  "hints": {
+    "category": "writing"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "subscription",
+          "id": "claude",
+          "name": "Claude"
+        },
+        {
+          "kind": "subscription",
+          "id": "codex",
+          "name": "ChatGPT"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T00:00:00Z",
+  "sources": [
+    {
+      "name": "hand-seeded-v0",
+      "note": "hand-curated estimates; the weekly benchmark workflow refreshes this file by pull request"
+    }
+  ],
+  "difficultyFloor": {
+    "trivial": 0,
+    "easy": 40,
+    "medium": 65,
+    "hard": 80
+  },
+  "categories": {
+    "coding": [
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 92, "costWeight": 4, "tokensPerTask": 1.9, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "opus", "score": 90, "costWeight": 5, "tokensPerTask": 1.8, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 84, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 82, "costWeight": 3, "tokensPerTask": 1.2, "maxEffort": "xhigh" },
+      { "provider": "grok", "model": "grok-4.5", "score": 75, "costWeight": 3, "tokensPerTask": 1.1, "maxEffort": "high" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 72, "costWeight": 2, "tokensPerTask": 1.0 },
+      { "provider": "claude", "model": "haiku", "score": 66, "costWeight": 1, "tokensPerTask": 0.7, "maxEffort": "medium" }
+    ],
+    "agentic-coding": [
+      { "provider": "claude", "model": "opus", "score": 93, "costWeight": 5, "tokensPerTask": 2.2, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 90, "costWeight": 4, "tokensPerTask": 2.1, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 85, "costWeight": 3, "tokensPerTask": 1.2, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 81, "costWeight": 3, "tokensPerTask": 1.4, "maxEffort": "xhigh" },
+      { "provider": "grok", "model": "grok-4.5", "score": 70, "costWeight": 3, "tokensPerTask": 1.2, "maxEffort": "high" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 67, "costWeight": 2, "tokensPerTask": 1.1 },
+      { "provider": "claude", "model": "haiku", "score": 60, "costWeight": 1, "tokensPerTask": 0.8, "maxEffort": "medium" }
+    ],
+    "reasoning": [
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 92, "costWeight": 4, "tokensPerTask": 2.2, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "opus", "score": 91, "costWeight": 5, "tokensPerTask": 2.0, "maxEffort": "xhigh" },
+      { "provider": "grok", "model": "grok-4.5", "score": 86, "costWeight": 3, "tokensPerTask": 1.3, "maxEffort": "high" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 83, "costWeight": 3, "tokensPerTask": 1.3, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 77, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "xhigh" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 71, "costWeight": 2, "tokensPerTask": 1.0 },
+      { "provider": "claude", "model": "haiku", "score": 58, "costWeight": 1, "tokensPerTask": 0.7, "maxEffort": "medium" }
+    ],
+    "writing": [
+      { "provider": "claude", "model": "opus", "score": 92, "costWeight": 5, "tokensPerTask": 1.6, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 88, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 83, "costWeight": 4, "tokensPerTask": 1.6, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 80, "costWeight": 3, "tokensPerTask": 1.1, "maxEffort": "xhigh" },
+      { "provider": "grok", "model": "grok-4.5", "score": 77, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "high" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 74, "costWeight": 2, "tokensPerTask": 1.0 },
+      { "provider": "claude", "model": "haiku", "score": 71, "costWeight": 1, "tokensPerTask": 0.7, "maxEffort": "medium" }
+    ],
+    "chat": [
+      { "provider": "claude", "model": "opus", "score": 89, "costWeight": 5, "tokensPerTask": 1.6, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 86, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 84, "costWeight": 4, "tokensPerTask": 1.5, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 82, "costWeight": 3, "tokensPerTask": 1.1, "maxEffort": "xhigh" },
+      { "provider": "grok", "model": "grok-4.5", "score": 80, "costWeight": 3, "tokensPerTask": 1.0, "maxEffort": "high" },
+      { "provider": "claude", "model": "haiku", "score": 76, "costWeight": 1, "tokensPerTask": 0.7, "maxEffort": "medium" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 72, "costWeight": 2, "tokensPerTask": 1.0 }
+    ],
+    "long-context": [
+      { "provider": "claude", "model": "opus", "score": 86, "costWeight": 5, "tokensPerTask": 1.9, "maxEffort": "xhigh" },
+      { "provider": "claude", "model": "sonnet", "score": 82, "costWeight": 3, "tokensPerTask": 1.1, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.6-sol", "score": 81, "costWeight": 4, "tokensPerTask": 1.9, "maxEffort": "xhigh" },
+      { "provider": "codex", "model": "gpt-5.5", "score": 77, "costWeight": 3, "tokensPerTask": 1.2, "maxEffort": "xhigh" },
+      { "provider": "kimi", "model": "kimi-k3", "score": 76, "costWeight": 2, "tokensPerTask": 1.0 },
+      { "provider": "grok", "model": "grok-4.5", "score": 72, "costWeight": 3, "tokensPerTask": 1.1, "maxEffort": "high" },
+      { "provider": "claude", "model": "haiku", "score": 68, "costWeight": 1, "tokensPerTask": 0.8, "maxEffort": "medium" }
+    ]
+  }
+}

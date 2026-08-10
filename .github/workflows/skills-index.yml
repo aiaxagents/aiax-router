@@ -1,0 +1,58 @@
+name: Skills index
+
+on:
+  schedule:
+    # Mondays 05:00 UTC.
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:scripts
+
+      # stdout is the summary and becomes the PR body; stderr carries the per-skill log.
+      # The script exits 0 even when skills are broken and reports the count as an output.
+      - name: Check the skills index
+        id: check
+        run: |
+          CHECKED_AT="$(date -u +%FT%TZ)" \
+            node dist-scripts/build-skills-index.js > pr-body.md
+
+      - name: Show summary
+        run: cat pr-body.md
+
+      # create-pull-request needs a file change to open anything, and v0 never edits
+      # skills-index.json, so the summary itself is the tracked payload. No problems means
+      # no commit and no pull request: a weekly green PR is noise nobody reads.
+      - name: Record the report
+        if: steps.check.outputs.problems != '0'
+        run: cp pr-body.md docs/skills-index-report.md
+
+      # Opens a PR, never pushes to main. Note: PRs created with GITHUB_TOKEN do not
+      # trigger ci.yml; close and reopen the PR, or swap in a PAT, if that is wanted.
+      - uses: peter-evans/create-pull-request@v7
+        if: steps.check.outputs.problems != '0'
+        with:
+          branch: bot/skills-index
+          # Only the report: dist-scripts/ is build output and must not land in the PR.
+          add-paths: docs/skills-index-report.md
+          commit-message: 'chore: weekly skills index check found problems'
+          title: Weekly skills index check found problems
+          body-path: pr-body.md
+          labels: skills-index
+          delete-branch: true

@@ -1,0 +1,12 @@
+{
+  "id": "aiaxmail",
+  "name": "AiAxmail",
+  "kind": "email",
+  "label": "Email",
+  "does": "Gives your agents a real email address.",
+  "capabilities": ["send", "receive"],
+  "connect": "mcp",
+  "metered": true,
+  "note": "This one is ours. Connect it with the MCP address AiAxmail gives you. Metered separately, outside your AI subscriptions.",
+  "brand": "aiax"
+}

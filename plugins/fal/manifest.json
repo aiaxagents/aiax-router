@@ -1,0 +1,12 @@
+{
+  "id": "fal",
+  "name": "Fal.ai",
+  "kind": "media",
+  "label": "Image, video, audio",
+  "does": "Makes pictures, video and sound from a prompt.",
+  "capabilities": ["image", "video", "audio", "upscale"],
+  "pricingUrl": "https://fal.ai/pricing",
+  "keyEnv": "FAL_KEY",
+  "metered": true,
+  "note": "You buy this directly from Fal.ai and paste your key in Settings. It is billed per use by them, separate from your AI subscriptions."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "booking",
+  "name": "Booking",
+  "order": 5,
+  "icon": "calendar",
+  "avatar": "avatar-booking.png",
+  "tagline": "Books hotels, restaurants and travel.",
+  "placeholder": "Say what you want booked, and when.",
+  "hints": {
+    "category": "chat"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "any-subscription",
+          "name": "Any subscription"
+        }
+      ]
+    },
+    {
+      "any": [
+        {
+          "kind": "plugin",
+          "id": "aiaxmail",
+          "name": "AiAxmail"
+        }
+      ]
+    }
+  ],
+  "hint": "Books by writing real email. Replies land back with the agent."
+}

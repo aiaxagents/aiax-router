@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AiAx Router: the right model on every job, automatically</title>
+<meta name="description" content="A free, open-source dispatcher for the AI subscriptions you already pay for. It splits your request into jobs, picks the right model and effort for each, and five review agents grade the result. No API keys, no extra bill.">
+<meta property="og:title" content="AiAx Router">
+<meta property="og:description" content="The right model on every job, automatically. Free, open source, no API keys.">
+<meta property="og:image" content="https://aiaxrouter.com/assets/og.png">
+<meta property="og:url" content="https://aiaxrouter.com">
+<meta name="theme-color" content="#f0d15f">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/sg.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="bar">
+  <a class="wordmark" href="/" aria-label="AiAx Router home">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 H9 Q12 17 12 12 T15 7 H21 M15 17 h6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>
+    AiAx Router
+  </a>
+  <div class="bar-links">
+    <a href="#versus">Why</a>
+    <a href="#works">How it works</a>
+    <span class="chip-preview" aria-label="Status: developer preview">DEVELOPER&nbsp;PREVIEW</span>
+    <a class="bar-gh" href="https://github.com/aiaxagents/aiax-router">GitHub</a>
+  </div>
+</nav>
+
+<!-- ============ HERO: golden field, ink type ============ -->
+<header class="hero">
+  <div class="hero-grid">
+    <h1>The right model on every&nbsp;job. Automatically.</h1>
+    <div class="hero-side">
+      <p class="lede">AiAx Router is a free, open-source dispatcher for the AI subscriptions you
+      already pay for. It splits your request into jobs, hands each one to the strongest CLI agent
+      you have for that kind of work at the right reasoning effort, and has five review agents
+      grade the result before you see it. You never pick a model. No API keys, no extra bill.</p>
+      <div class="cta-row">
+        <a class="btn btn-solid" href="https://github.com/aiaxagents/aiax-router/releases/latest/download/AiAx-Router.dmg" download>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9M4.5 6.5 8 10l3.5-3.5M2 13h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+          Download for Mac
+        </a>
+        <a class="btn btn-solid" href="https://github.com/aiaxagents/aiax-router/releases/latest/download/AiAx-Router-Setup.exe" download>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9M4.5 6.5 8 10l3.5-3.5M2 13h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn btn-line" href="https://github.com/aiaxagents/aiax-router">Open the repo</a>
+      </div>
+      <p class="fine">macOS 13+ Apple silicon &middot; Windows 10+ &middot; Intel Mac and Linux on the <a href="https://github.com/aiaxagents/aiax-router/releases">releases page</a> &middot; free under MIT</p>
+    </div>
+  </div>
+
+  <!-- The film: one task replayed through the backend, line by line. -->
+  <figure class="film" aria-label="Replay of one task moving through the router: the task is read, split into three jobs, each job dispatched to a different model at its own effort level, then reviewed by five agents and shipped at 9.8 out of 10.">
+    <div class="film-chrome"><i></i><i></i><i></i><span>DISPATCH LOG &middot; ONE TASK, REPLAYED</span></div>
+    <div class="film-body" id="film">
+      <p class="fl f-task" data-s="0"><span class="fl-k">task</span><span class="fl-q">"Fix the checkout rounding bug, then write the release note"</span></p>
+      <p class="fl" data-s="1"><span class="fl-k">intent</span><span class="mchip">claude opus</span><span class="echip">xhigh</span><span class="fl-t">defines what done means &middot; cuts 3 jobs</span></p>
+      <p class="fl fl-job" data-s="2"><span class="fl-k">job 1</span><span class="fl-t">coding &middot; hard</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="mchip">codex gpt-5.6-sol</span><span class="echip">high</span><span class="load" aria-hidden="true"><i></i></span><span class="fl-ok" data-s="5">pass</span></p>
+      <p class="fl fl-job" data-s="3"><span class="fl-k">job 2</span><span class="fl-t">tests &middot; medium</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="mchip">claude sonnet</span><span class="echip">medium</span><span class="load" aria-hidden="true"><i></i></span><span class="fl-ok" data-s="5">pass</span></p>
+      <p class="fl fl-job" data-s="4"><span class="fl-k">job 3</span><span class="fl-t">writing &middot; easy</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="mchip">claude haiku</span><span class="echip">low</span><span class="load" aria-hidden="true"><i></i></span><span class="fl-ok" data-s="5">pass</span></p>
+      <p class="fl" data-s="6"><span class="fl-k">assemble</span><span class="fl-t">three pieces, one answer</span></p>
+      <p class="fl f-review" data-s="7"><span class="fl-k">review</span><span class="rchip">correct 10</span><span class="rchip">complete 9.5</span><span class="rchip">quality 10</span><span class="rchip">robust 9.5</span><span class="rchip">simple 10</span></p>
+      <p class="fl f-verdict" data-s="8"><span class="fl-k">verdict</span><b>9.8 / 10 &middot; shipped</b><span class="fl-t">easy work went cheap, opus stayed fresh</span></p>
+    </div>
+  </figure>
+</header>
+
+<main>
+<!-- ============ VERSUS ============ -->
+<section class="versus" id="versus">
+  <div class="sec-head reveal">
+    <p class="kicker">The point of it</p>
+    <h2>Why not just open Claude&nbsp;Code or&nbsp;ChatGPT?</h2>
+    <p class="sub">Because one app is one model at one effort level, and you are its review
+    process. For everyday tasks and for coding, that wastes both quality and quota.</p>
+  </div>
+
+  <div class="ledger reveal" role="table" aria-label="One app on its own compared with going through the router">
+    <div class="lrow lrow-head" role="row">
+      <span role="columnheader" class="lc-no" aria-hidden="true"></span>
+      <span role="columnheader">One app on its own</span>
+      <span role="columnheader">Through the router</span>
+    </div>
+    <div class="lrow" role="row">
+      <span class="lc-no" aria-hidden="true">01</span>
+      <span role="cell">One model, at whatever effort you happened to pick.</span>
+      <span role="cell"><b>Each job gets the strongest model you have for that kind of work,</b> at the effort the difficulty calls for.</span>
+    </div>
+    <div class="lrow" role="row">
+      <span class="lc-no" aria-hidden="true">02</span>
+      <span role="cell">Frontier quota burns on renames and one-liners.</span>
+      <span role="cell"><b>Easy parts go to cheap models.</b> The expensive capacity is still there when the work turns hard.</span>
+    </div>
+    <div class="lrow" role="row">
+      <span class="lc-no" aria-hidden="true">03</span>
+      <span role="cell">You read the output and hope it is right.</span>
+      <span role="cell"><b>Five review agents grade every result</b> for correctness, completeness, quality, robustness and simplicity. Under a 9 goes back before it reaches you.</span>
+    </div>
+    <div class="lrow" role="row">
+      <span class="lc-no" aria-hidden="true">04</span>
+      <span role="cell">You paste the context and instructions yourself, every time.</span>
+      <span role="cell"><b>Built-in skills ride along automatically,</b> matched to the kind of work each job is.</span>
+    </div>
+    <div class="lrow" role="row">
+      <span class="lc-no" aria-hidden="true">05</span>
+      <span role="cell">Every subscription is its own island.</span>
+      <span role="cell"><b>Claude, ChatGPT, Grok and Kimi pool into one crew.</b> Only Claude? It still spreads work across Opus, Sonnet and Haiku, so one plan goes further.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEASURED ============ -->
+<section class="measured">
+  <div class="measured-inner reveal">
+    <h2>Decided by measurement, not habit.</h2>
+    <p>Routing runs on public benchmarks that refresh weekly, and just as much on what a task
+    actually costs each model in tokens. A model that scores slightly higher but needs twice the
+    tokens loses the easy jobs and keeps the hard ones. That is the whole trick: quality per token,
+    per kind of work, decided from real measurements instead of a favourite.</p>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="works" id="works">
+  <div class="sec-head reveal">
+    <p class="kicker">What happens when you press Enter</p>
+    <h2>You write one line. The router runs the rest.</h2>
+  </div>
+
+  <div class="works-body">
+    <ol class="manifest reveal" aria-label="The pipeline">
+      <li><span class="mno">01</span><b>Understand.</b> The best model available works out what a great result would look like before anyone starts.</li>
+      <li><span class="mno">02</span><b>Split.</b> Big requests break into smaller jobs, each tagged with the kind of work it is and how hard it is.</li>
+      <li><span class="mno">03</span><b>Dispatch.</b> Every job goes to whichever agent measures best for that work, at the right effort, with the right skills. If one drops it, the next takes over.</li>
+      <li><span class="mno">04</span><b>Assemble.</b> The finished pieces come back and get merged into one answer.</li>
+      <li><span class="mno">05</span><b>Inspect.</b> Five review agents grade it. Under a 9, it goes back for another pass, and whatever still falls short is said out loud.</li>
+    </ol>
+
+    <figure class="shot reveal">
+      <div class="shot-chrome" aria-hidden="true"><i></i><i></i><i></i><span>localhost:4300 · recorded from a real run</span></div>
+      <video src="assets/run.mp4" poster="assets/run-poster.png" autoplay muted loop playsinline width="1280" height="800"
+        aria-label="Screen recording of the AiAx Router app running one real task: the request is typed into chat, the router splits it into jobs, Kimi picks up the coding part at medium effort with the test-driven development skill, and the finished task is opened from the board."></video>
+      <figcaption>One real task, recorded in the app: typed in chat, split into jobs, dispatched with the right skill, then opened from the board.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ RECEIPT ============ -->
+<section class="receipt-band">
+  <div class="receipt-copy reveal">
+    <p class="kicker">No API keys anywhere</p>
+    <h2>Your subscriptions do the work. The router keeps the receipt.</h2>
+    <p>Every task totals what the same tokens would have cost at API list price, so you can
+    see what your flat-rate plans just absorbed. The router talks to the official CLI
+    agents you have already installed and signed in to. Nothing to top up, nothing metered.</p>
+  </div>
+  <div class="paper reveal" role="img" aria-label="A receipt for one real task: 1.6 million tokens routed, 4 agents and 5 reviewers, API list value 3 dollars 51 cents, added to your bill: nothing. Stamped: covered by subscription.">
+    <p class="paper-head">AiAx Router &middot; task receipt</p>
+    <dl>
+      <div><dt>tokens routed</dt><dd>1,647,836</dd></div>
+      <div><dt>agents on the job</dt><dd>4</dd></div>
+      <div><dt>review agents</dt><dd>5</dd></div>
+      <div><dt>API list value</dt><dd>$3.51</dd></div>
+      <div class="paper-total"><dt>added to your bill</dt><dd>$0.00</dd></div>
+    </dl>
+    <p class="paper-stamp">covered by subscription</p>
+    <p class="paper-foot">one real task, one real receipt</p>
+  </div>
+</section>
+
+<!-- ============ OUTRO ============ -->
+<section class="outro">
+  <div class="outro-inner reveal">
+    <h2>Put your subscriptions to&nbsp;work.</h2>
+    <div class="cta-row">
+      <a class="btn btn-solid" href="https://github.com/aiaxagents/aiax-router/releases/latest/download/AiAx-Router.dmg" download>Download for Mac</a>
+      <a class="btn btn-solid" href="https://github.com/aiaxagents/aiax-router/releases/latest/download/AiAx-Router-Setup.exe" download>Download for Windows</a>
+      <a class="btn btn-line" href="https://github.com/aiaxagents/aiax-router">Open the repo</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>Built by AiAx AS &middot; MIT open source</p>
+  <p><a href="https://github.com/aiaxagents/aiax-router">github.com/aiaxagents/aiax-router</a></p>
+</footer>
+
+<script>
+  document.documentElement.classList.add('js');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Scroll reveal.
+  if (still) document.querySelectorAll('.reveal').forEach((n) => n.classList.add('in'));
+  else {
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -10% 0px' });
+    document.querySelectorAll('.reveal').forEach((n) => io.observe(n));
+  }
+
+  // The film: reveal steps on a timeline, hold the last frame, loop.
+  // Under reduced motion the finished frame is shown, static.
+  {
+    const rows = [...document.querySelectorAll('#film [data-s]')];
+    const steps = 1 + Math.max(...rows.map((n) => +n.dataset.s));
+    const showUpTo = (s) => rows.forEach((n) => n.classList.toggle('on', +n.dataset.s <= s));
+    if (still) showUpTo(steps);
+    else {
+      const BEAT = [900, 1100, 700, 700, 700, 1900, 900, 1100, 1200];
+      let step = -1;
+      const tick = () => {
+        step += 1;
+        if (step >= steps) {
+          setTimeout(() => { showUpTo(-1); step = -1; setTimeout(tick, 700); }, 4200);
+          return;
+        }
+        showUpTo(step);
+        setTimeout(tick, BEAT[step] ?? 900);
+      };
+      setTimeout(tick, 600);
+    }
+  }
+</script>
+</body>
+</html>

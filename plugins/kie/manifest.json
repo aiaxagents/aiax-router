@@ -1,0 +1,12 @@
+{
+  "id": "kie",
+  "name": "Kie.ai",
+  "kind": "media",
+  "label": "Image, video, music",
+  "does": "Makes pictures, video and music from a prompt.",
+  "capabilities": ["image", "video", "music"],
+  "pricingUrl": "https://kie.ai/pricing",
+  "keyEnv": "KIE_API_KEY",
+  "metered": true,
+  "note": "You buy this directly from Kie.ai and paste your key in Settings. It is billed per use by them, separate from your AI subscriptions."
+}

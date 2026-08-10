@@ -1,0 +1,28 @@
+{
+  "id": "coder",
+  "name": "Coder",
+  "order": 2,
+  "icon": "code",
+  "avatar": "avatar-coder.png",
+  "tagline": "Builds small apps and scripts.",
+  "placeholder": "Say what you want built or fixed.",
+  "hints": {
+    "category": "coding"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "subscription",
+          "id": "codex",
+          "name": "ChatGPT"
+        },
+        {
+          "kind": "subscription",
+          "id": "claude",
+          "name": "Claude"
+        }
+      ]
+    }
+  ]
+}

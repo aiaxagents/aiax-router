@@ -1,0 +1,48 @@
+name: Routing table
+
+on:
+  schedule:
+    # Mondays 04:00 UTC.
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:scripts
+
+      # stdout is the summary and becomes the PR body; stderr carries the per-source log.
+      - name: Rebuild routing-table.json
+        run: |
+          GENERATED_AT="$(date -u +%FT%TZ)" \
+            node dist-scripts/build-routing-table.js --out routing-table.json > pr-body.md
+
+      - name: Show summary
+        run: cat pr-body.md
+
+      # Opens a PR, never pushes to main. Note: PRs created with GITHUB_TOKEN do not
+      # trigger ci.yml; close and reopen the PR, or swap in a PAT, if that is wanted.
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: bot/routing-table
+          # Only the table: dist-scripts/ is build output and must not land in the PR.
+          add-paths: routing-table.json
+          commit-message: 'chore: weekly routing table update'
+          title: Weekly routing table update
+          body-path: pr-body.md
+          labels: routing-table
+          delete-branch: true

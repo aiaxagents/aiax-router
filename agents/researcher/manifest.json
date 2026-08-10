@@ -1,0 +1,22 @@
+{
+  "id": "researcher",
+  "name": "Researcher",
+  "order": 3,
+  "icon": "search",
+  "avatar": "avatar-researcher.png",
+  "tagline": "Finds facts and checks they are true.",
+  "placeholder": "Ask what you want found out.",
+  "hints": {
+    "category": "reasoning"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "any-subscription",
+          "name": "Any subscription you have"
+        }
+      ]
+    }
+  ]
+}

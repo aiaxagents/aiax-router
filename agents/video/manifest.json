@@ -1,0 +1,32 @@
+{
+  "id": "video",
+  "name": "Video maker",
+  "order": 7,
+  "icon": "film",
+  "avatar": "avatar-video.png",
+  "tagline": "Makes short videos from your notes.",
+  "placeholder": "Say what the video should show.",
+  "hints": {
+    "category": "writing"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "any-subscription",
+          "name": "Any subscription"
+        }
+      ]
+    },
+    {
+      "any": [
+        {
+          "kind": "plugin",
+          "id": "higgsfield",
+          "name": "Higgsfield"
+        }
+      ]
+    }
+  ],
+  "hint": "Connect Higgsfield to use this one."
+}

@@ -1,0 +1,32 @@
+{
+  "comment": "USD per 1M tokens at each vendor's public API list price. Subscriptions cover the actual runs; these numbers only show what the same work would have cost on the API, so treat every figure as an estimate and edit freely. The board refreshes live list prices from OpenRouter's public model list daily into prices-cache.json in the config dir; this file is the offline fallback. Unknown models fall back to their provider's default.",
+  "providers": {
+    "claude": {
+      "default": { "input": 3, "output": 15 },
+      "models": {
+        "haiku": { "input": 1, "output": 5 },
+        "sonnet": { "input": 3, "output": 15 },
+        "opus": { "input": 5, "output": 25 }
+      }
+    },
+    "codex": {
+      "default": { "input": 1.25, "output": 10 },
+      "models": {
+        "gpt-5.5": { "input": 1.25, "output": 10 },
+        "gpt-5.6-sol": { "input": 1.25, "output": 10 }
+      }
+    },
+    "grok": {
+      "default": { "input": 3, "output": 15 },
+      "models": {
+        "grok-4.5": { "input": 3, "output": 15 }
+      }
+    },
+    "kimi": {
+      "default": { "input": 0.6, "output": 2.5 },
+      "models": {
+        "kimi-k3": { "input": 0.6, "output": 2.5 }
+      }
+    }
+  }
+}

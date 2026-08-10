@@ -1,0 +1,43 @@
+{
+  "id": "social",
+  "name": "Social content",
+  "order": 8,
+  "icon": "megaphone",
+  "avatar": "avatar-social.png",
+  "tagline": "Makes posts, carousels and captions for LinkedIn and X.",
+  "placeholder": "Say what you want posted about.",
+  "hints": {
+    "category": "writing"
+  },
+  "requires": [
+    {
+      "any": [
+        {
+          "kind": "subscription",
+          "id": "claude",
+          "name": "Claude"
+        },
+        {
+          "kind": "subscription",
+          "id": "codex",
+          "name": "ChatGPT"
+        }
+      ]
+    },
+    {
+      "any": [
+        {
+          "kind": "plugin",
+          "id": "fal",
+          "name": "Fal.ai"
+        },
+        {
+          "kind": "plugin",
+          "id": "kie",
+          "name": "Kie.ai"
+        }
+      ]
+    }
+  ],
+  "hint": "Needs an image plugin. Connect one under Plugins."
+}

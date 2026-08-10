@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-web/
+*.log
+.DS_Store
+.env
+dist-scripts/
+dist-sidecar/
+.lavish/
+.vercel/

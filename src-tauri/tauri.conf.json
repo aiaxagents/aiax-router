@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AiAx Router",
+  "version": "0.1.0",
+  "identifier": "ai.aiaxagents.router",
+  "build": {
+    "frontendDist": "starting",
+    "beforeBuildCommand": "npm run app:prepare",
+    "beforeDevCommand": "npm run app:prepare"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'",
+      "capabilities": ["default"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg", "nsis", "appimage", "deb"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/aiax-router-server"],
+    "resources": {
+      "../dist-web/": "dist-web/",
+      "../agents/": "agents/",
+      "../plugins/": "plugins/",
+      "../routing-table.json": "routing-table.json",
+      "../skills-index.json": "skills-index.json",
+      "../LICENSE": "LICENSE.txt",
+      "binaries/NODE_LICENSE.txt": "NODE_LICENSE.txt"
+    },
+    "category": "DeveloperTool",
+    "shortDescription": "Get the best out of the AI subscriptions you already pay for",
+    "longDescription": "AiAx Router picks the right model, reasoning effort and skills for every task, by return on investment, across the AI subscriptions you already pay for. Everything runs on this computer.",
+    "copyright": "MIT licensed",
+    "macOS": {
+      "minimumSystemVersion": "13.0"
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  }
+}
