@@ -17,6 +17,7 @@
  * an `externalBin` sidecar.
  */
 import { execFileSync } from 'node:child_process';
+import { buildSync } from 'esbuild';
 import {
   chmodSync,
   copyFileSync,
@@ -121,17 +122,20 @@ const builderNode =
 
 // --- 1. bundle ---------------------------------------------------------------
 // `import.meta.url` has no meaning in CommonJS, so rewrite it to the equivalent
-// expression rather than leave esbuild's empty-object shim behind.
-run(join(ROOT, 'node_modules', '.bin', 'esbuild'), [
-  join(ROOT, 'dist', 'cli', 'index.js'),
-  '--bundle',
-  '--platform=node',
-  '--format=cjs',
-  '--target=node20',
-  '--banner:js=const AIAX_IMPORT_META_URL = require("node:url").pathToFileURL(__filename).href;',
-  '--define:import.meta.url=AIAX_IMPORT_META_URL',
-  `--outfile=${join(WORK, 'server.cjs')}`,
-]);
+// expression rather than leave esbuild's empty-object shim behind. The JS API,
+// not the `.bin` launcher: on Windows that launcher is a shell script and
+// spawning it directly fails, while the API finds the right binary everywhere.
+buildSync({
+  entryPoints: [join(ROOT, 'dist', 'cli', 'index.js')],
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node20',
+  banner: { js: 'const AIAX_IMPORT_META_URL = require("node:url").pathToFileURL(__filename).href;' },
+  define: { 'import.meta.url': 'AIAX_IMPORT_META_URL' },
+  outfile: join(WORK, 'server.cjs'),
+  logLevel: 'info',
+});
 
 writeFileSync(
   join(WORK, 'sea-config.json'),
