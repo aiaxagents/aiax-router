@@ -110,11 +110,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           src=$(ls src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg | head -n1)
+          rid=${{ steps.tauri.outputs.releaseId }}
+          # A rerun against the same draft hits a name conflict, so drop any stale copy first.
+          for id in $(gh api "repos/${{ github.repository }}/releases/$rid/assets" --jq '.[] | select(.name=="AiAx-Router.dmg") | .id'); do
+            gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$id"
+          done
           curl -sSf -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @"$src" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.tauri.outputs.releaseId }}/assets?name=AiAx-Router.dmg" > /dev/null
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$rid/assets?name=AiAx-Router.dmg" > /dev/null
 
       - name: Upload stable-named setup exe (Windows)
         if: matrix.target == 'x86_64-pc-windows-msvc'
@@ -123,8 +128,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           src=$(ls src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe | head -n1)
+          rid=${{ steps.tauri.outputs.releaseId }}
+          # A rerun against the same draft hits a name conflict, so drop any stale copy first.
+          for id in $(gh api "repos/${{ github.repository }}/releases/$rid/assets" --jq '.[] | select(.name=="AiAx-Router-Setup.exe") | .id'); do
+            gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$id"
+          done
           curl -sSf -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @"$src" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.tauri.outputs.releaseId }}/assets?name=AiAx-Router-Setup.exe" > /dev/null
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$rid/assets?name=AiAx-Router-Setup.exe" > /dev/null
