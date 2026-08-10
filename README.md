@@ -168,7 +168,8 @@ distills from finished tasks ([docs/memory.md](docs/memory.md)). The full produc
 
 Contributions are welcome, adapters most of all: the interface is four small methods, documented in
 [docs/adapters.md](docs/adapters.md). Read [CONTRIBUTING.md](CONTRIBUTING.md) for how the project
-works day to day.
+works day to day. Security reports go to **router@aiaxmail.com** (see [SECURITY.md](SECURITY.md)),
+not the public issue tracker.
 
 ## License
 
