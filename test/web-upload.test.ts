@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseMultipart, safeJoin } from '../src/web/serve.js';
 import { safeName } from '../src/web/tasks.js';
@@ -70,7 +71,7 @@ describe('safeName', () => {
 
 describe('safeJoin', () => {
   it('resolves a normal path inside the directory', () => {
-    expect(safeJoin('/tmp/results', 'answer.md')).toBe('/tmp/results/answer.md');
+    expect(safeJoin('/tmp/results', 'answer.md')).toBe(resolve('/tmp/results', 'answer.md'));
   });
 
   it('refuses to climb out, encoded or not', () => {
@@ -80,7 +81,7 @@ describe('safeJoin', () => {
   });
 
   it('reads a leading slash as the top of the directory, not of the disk', () => {
-    expect(safeJoin('/tmp/results', '/etc/passwd')).toBe('/tmp/results/etc/passwd');
+    expect(safeJoin('/tmp/results', '/etc/passwd')).toBe(resolve('/tmp/results', 'etc/passwd'));
   });
 
   it('refuses a broken percent escape instead of guessing', () => {
