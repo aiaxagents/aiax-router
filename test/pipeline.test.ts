@@ -251,6 +251,30 @@ describe('runPipeline', () => {
     expect(done.state.reviewRounds.map((r) => r.average)).toEqual([8, 9.6]);
   });
 
+  it('stops once a pass comes back no better than the best one', async () => {
+    // What a real run did: 7.6, then 6.9, then two more rounds to land lower
+    // than it started. On work whose facts nobody can check the panel swings
+    // instead of converging, and every swing costs minutes and money.
+    scores = [7.6, 6.9, 8.5, 6.4];
+    const { lines, done } = await pipeline();
+
+    expect(done.rounds).toBe(2);
+    expect(reviewCalls).toBe(10);
+    // The first pass was the best, so that is the one that comes back.
+    expect(done.answer).toBe('ASSEMBLED ANSWER');
+    expect(done.outcome?.average).toBe(7.6);
+    expect(done.state.status).toBe('needs-work');
+    expect(lines.at(-1)).toContain('no better than the best pass');
+  });
+
+  it('keeps going while each pass is still an improvement', async () => {
+    scores = [7.6, 8.5, 9.6];
+    const { done } = await pipeline();
+
+    expect(done.rounds).toBe(3);
+    expect(done.outcome?.passed).toBe(true);
+  });
+
   it('stops at the round cap and says what is still missing', async () => {
     scores = [8.2];
     const { lines, done } = await pipeline({ maxRounds: 2 });

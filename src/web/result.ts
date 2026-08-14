@@ -13,9 +13,18 @@ export function escapeHtml(text: string): string {
 }
 
 function inline(text: string): string {
-  return escapeHtml(text)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  return (
+    escapeHtml(text)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      // Escaping ran first, so the href here holds no quote that could break
+      // out of the attribute, and only the two schemes a person would click
+      // are let through. Everything else stays the characters the model wrote.
+      .replace(
+        /\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/gi,
+        '<a href="$2" target="_blank" rel="noreferrer noopener">$1</a>',
+      )
+  );
 }
 
 /**

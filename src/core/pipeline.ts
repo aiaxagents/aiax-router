@@ -565,6 +565,7 @@ export async function* runPipeline(
       best = { answer, outcome };
       break;
     }
+    const bestSoFar = best.outcome?.average ?? -1;
     if (!best.outcome || outcome.average > best.outcome.average) best = { answer, outcome };
     if (outcome.passed) {
       yield progress(`The review agents are happy with it, ${outcome.average} out of 10.`);
@@ -573,6 +574,16 @@ export async function* runPipeline(
     if (round === maxRounds) {
       yield progress(
         `After ${maxRounds} ${maxRounds === 1 ? 'try' : 'tries'} this is the best it got, and I will tell you straight what is still off.`,
+      );
+      break;
+    }
+    // A pass that scored no better than the best so far means the panel has
+    // stopped converging, and on work whose facts nobody can check it will
+    // swing up and down forever. Each further round costs minutes and money to
+    // end up somewhere already seen, so this is where it stops.
+    if (outcome.average <= bestSoFar) {
+      yield progress(
+        `Round ${round} came back no better than the best pass, so another round would only cost time.`,
       );
       break;
     }

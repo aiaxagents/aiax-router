@@ -5,8 +5,8 @@ import type { ReactNode } from 'react';
  * bullets, numbered lists and paragraphs. It builds elements rather than
  * markup, so nothing a model writes can ever become live HTML.
  */
-export function Markdown({ text, limit }: { text: string; limit?: number }) {
-  const source = limit && text.length > limit ? `${text.slice(0, limit).trimEnd()}...` : text;
+export function Markdown({ text }: { text: string }) {
+  const source = text;
   const out: ReactNode[] = [];
   let list: string[] = [];
   let code: string[] | null = null;
@@ -74,9 +74,9 @@ export function Markdown({ text, limit }: { text: string; limit?: number }) {
   return <>{out}</>;
 }
 
-/** Bold and code only. Anything else stays the plain characters the model wrote. */
+/** Bold, code and links. Anything else stays the plain characters the model wrote. */
 function inline(text: string): ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean);
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]\n]+\]\([^)\s]+\))/g).filter(Boolean);
   if (parts.length === 1) return text;
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) return <b key={i}>{part.slice(2, -2)}</b>;
@@ -85,6 +85,16 @@ function inline(text: string): ReactNode {
         <code className="path" key={i}>
           {part.slice(1, -1)}
         </code>
+      );
+    }
+    const link = /^\[([^\]\n]+)\]\(([^)\s]+)\)$/.exec(part);
+    // Only the two schemes a person would click. Anything else, javascript:
+    // above all, falls through and shows as the characters the model wrote.
+    if (link && /^https?:\/\//i.test(link[2])) {
+      return (
+        <a className="link" href={link[2]} target="_blank" rel="noreferrer noopener" key={i}>
+          {link[1]}
+        </a>
       );
     }
     return <span key={i}>{part}</span>;

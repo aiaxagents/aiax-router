@@ -54,6 +54,27 @@ export interface TaskRecord {
 /** Enough to read in the thread; the whole thing lives on the result page. */
 const EXCERPT_CHARS = 900;
 
+/**
+ * Cut where a reader would cut. Slicing at a fixed count lands mid-word, and
+ * worse, mid-`**bold**`, which leaves the asterisks showing in the thread.
+ */
+export function excerptOf(answer: string): string {
+  if (answer.length <= EXCERPT_CHARS) return answer;
+  const cut = answer.slice(0, EXCERPT_CHARS);
+  // A line break ends a whole thought, so prefer it. Fall back to a word break
+  // when there is no line to end on, or when ending on one would throw most of
+  // the excerpt away, which is what a heading over one long paragraph does.
+  const line = cut.lastIndexOf('\n');
+  const at = line > EXCERPT_CHARS / 2 ? line : cut.lastIndexOf(' ');
+  let text = (at > 0 ? cut.slice(0, at) : cut).trimEnd();
+  if ((text.match(/\*\*/g)?.length ?? 0) % 2 === 1) {
+    text = text.slice(0, text.lastIndexOf('**')).trimEnd();
+  }
+  // Ending on a whole sentence is the common case now, and a full stop with an
+  // ellipsis behind it reads as four dots. The ellipsis absorbs the full stop.
+  return `${text.replace(/\.$/, '')}...`;
+}
+
 import type { ActiveRun } from '../core/activity.js';
 import type { Effort } from '../core/types.js';
 
@@ -299,10 +320,7 @@ async function runOneInner(rec: TaskRecord): Promise<void> {
       rec.passed = ev.outcome?.passed ?? undefined;
       rec.score = ev.outcome?.reviewed ? ev.outcome.average : undefined;
       rec.sentence = doneSentence(rec);
-      rec.excerpt =
-        ev.answer.length > EXCERPT_CHARS
-          ? `${ev.answer.slice(0, EXCERPT_CHARS).trimEnd()}...`
-          : ev.answer;
+      rec.excerpt = excerptOf(ev.answer);
       writeResult(rec, ev.answer);
       save(rec);
     }
