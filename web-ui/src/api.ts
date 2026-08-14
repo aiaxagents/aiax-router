@@ -230,6 +230,27 @@ export function fetchStatus(): Promise<Status> {
   return getJson('api/status');
 }
 
+/** Kept on the server: the desktop app's origin (its port) changes per launch. */
+export interface Prefs {
+  name?: string;
+  onboarded?: boolean;
+}
+
+export function fetchPrefs(): Promise<Prefs> {
+  return getJson('api/prefs');
+}
+
+export async function postPrefs(prefs: Prefs): Promise<Prefs> {
+  const res = await fetch('api/prefs', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(prefs),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body?.error ?? 'That did not go through.');
+  return body as Prefs;
+}
+
 export function fetchCatalog(): Promise<Catalog> {
   return getJson('api/catalog');
 }

@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import type { ActiveRun, BoardEvent, Catalog, Effort, RoutingState, Status, TaskRecord } from './api';
 import {
   fetchCatalog,
+  fetchPrefs,
   fetchRouting,
   fetchStatus,
   fetchTasks,
   postAnswer,
+  postPrefs,
   postRead,
   postRouting,
   postTask,
@@ -60,7 +62,8 @@ export function App() {
   const [runs, setRuns] = useState<ActiveRun[]>([]);
   const [routing, setRouting] = useState<RoutingState | null>(null);
   const [name, setName] = useState(() => localStorage.getItem(NAME_KEY) ?? '');
-  const [onboarded, setOnboarded] = useState(() => localStorage.getItem(DONE_KEY) === 'yes');
+  // null: the server has not answered yet, so show neither app nor onboarding.
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const [trouble, setTrouble] = useState<string | null>(null);
 
   const go = useCallback((href: string) => {
@@ -94,6 +97,29 @@ export function App() {
       .catch(() => undefined);
     pullStatus();
   }, [pullStatus]);
+
+  useEffect(() => {
+    fetchPrefs()
+      .then((prefs) => {
+        if (prefs.name) setName(prefs.name);
+        if (prefs.onboarded) {
+          setOnboarded(true);
+          return;
+        }
+        // Older builds kept this in localStorage; carry it over once.
+        if (localStorage.getItem(DONE_KEY) === 'yes') {
+          setOnboarded(true);
+          void postPrefs({
+            onboarded: true,
+            ...(localStorage.getItem(NAME_KEY) ? { name: localStorage.getItem(NAME_KEY)! } : {}),
+          }).catch(() => undefined);
+          return;
+        }
+        setOnboarded(false);
+      })
+      // A server without the prefs endpoint: fall back to localStorage alone.
+      .catch(() => setOnboarded(localStorage.getItem(DONE_KEY) === 'yes'));
+  }, []);
 
   useEffect(() => {
     const source = new EventSource('api/events');
@@ -197,6 +223,8 @@ export function App() {
   const say = useMemo(() => headline(tasks, status?.providers ?? []), [tasks, status]);
   const waiting = tasks.some((t) => t.question);
 
+  if (onboarded === null) return null;
+
   if (!onboarded) {
     return (
       <Onboarding
@@ -208,6 +236,7 @@ export function App() {
           setName(chosen);
           localStorage.setItem(NAME_KEY, chosen);
           localStorage.setItem(DONE_KEY, 'yes');
+          void postPrefs({ name: chosen, onboarded: true }).catch(() => undefined);
           setOnboarded(true);
         }}
       />

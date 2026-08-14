@@ -4,6 +4,7 @@ import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { adapters } from '../adapters/index.js';
 import { runPipeline, DEFAULT_MAX_ROUNDS } from '../core/pipeline.js';
+import { ensureUserPath } from '../core/userpath.js';
 import { availability, routeTask, runWithFailover } from '../core/router.js';
 import { update } from '../core/update.js';
 import { deadEntry, headroomInfo, readUsage, runsThisWeek } from '../core/usage.js';
@@ -247,6 +248,8 @@ async function runTask(argv: string[]): Promise<number> {
 }
 
 async function main(): Promise<number> {
+  // Started from Finder or the Dock, PATH has none of the vendor CLIs on it.
+  ensureUserPath();
   switch (command) {
     case 'run':
       return runTask(process.argv.slice(3));

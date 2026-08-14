@@ -15,7 +15,7 @@ import {
   memoryManifest,
 } from '../core/memory.js';
 import { appRoot } from '../core/paths.js';
-import { configPath, readJson } from '../core/store.js';
+import { configPath, readJson, writeJson } from '../core/store.js';
 import { deadEntry, headroomInfo, readUsage, runsThisWeek } from '../core/usage.js';
 import {
   answerTask,
@@ -219,6 +219,38 @@ function pluginsWithState(): Manifest[] {
     const stored = config?.plugins?.[String(p.id)]?.key;
     return { ...p, connected: Boolean(env || stored) };
   });
+}
+
+/**
+ * Small user preferences (name, onboarded) live on disk, not in the page's
+ * localStorage: the desktop app serves the board from a fresh random port on
+ * every launch, and localStorage is tied to the origin, port included.
+ */
+interface Prefs {
+  name?: string;
+  onboarded?: boolean;
+}
+
+function readPrefs(): Prefs {
+  const raw = readJson<Prefs>(configPath('prefs.json'), {});
+  return {
+    ...(typeof raw.name === 'string' ? { name: raw.name } : {}),
+    ...(typeof raw.onboarded === 'boolean' ? { onboarded: raw.onboarded } : {}),
+  };
+}
+
+async function putPrefs(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let parsed: Prefs;
+  try {
+    parsed = JSON.parse((await readBody(req)).toString('utf8') || '{}');
+  } catch {
+    return json(res, 400, { error: 'That request was not readable.' });
+  }
+  const next = { ...readPrefs() };
+  if (typeof parsed.name === 'string') next.name = parsed.name.slice(0, 200);
+  if (typeof parsed.onboarded === 'boolean') next.onboarded = parsed.onboarded;
+  writeJson(configPath('prefs.json'), next);
+  json(res, 200, next);
 }
 
 async function status(res: ServerResponse): Promise<void> {
@@ -516,6 +548,10 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 
     if (method === 'GET' && parts[0] === 'events' && parts.length === 1) return events(req, res);
     if (method === 'GET' && parts[0] === 'status' && parts.length === 1) return status(res);
+    if (parts[0] === 'prefs' && parts.length === 1) {
+      if (method === 'GET') return json(res, 200, readPrefs());
+      if (method === 'POST') return putPrefs(req, res);
+    }
     if (parts[0] === 'routing' && parts.length === 1) {
       if (method === 'GET') return json(res, 200, routingState());
       if (method === 'POST') return putRouting(req, res);
