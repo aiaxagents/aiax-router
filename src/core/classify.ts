@@ -30,6 +30,21 @@ const HARD =
   /\b(architecture|prove|security audit|threat model|end[- ]to[- ]end|multi[- ]?file|from scratch|refactor the (whole|entire)|migration plan|scal(e|ing) to)\b/i;
 const TRIVIAL = /^\s*(what is|what's|who is|when is|rename|typo|fix the typo|spell)\b/i;
 
+/**
+ * Talking to the router, not giving it work. Norwegian and English, because
+ * those are what gets typed here. Only consulted for short input, and only as
+ * the offline fallback: with a model available the classifier decides.
+ */
+const SMALLTALK =
+  /^\s*(hei|hallo|heisann|god (morgen|dag|kveld)|takk|tusen takk|ok(ay)?|jepp|ja|nei|er du (der|våken|klar)|hvem er du|hva (kan|heter) du|hvordan (går det|har du det)|hello|hi|hey|good (morning|afternoon|evening)|thanks|thank you|you there|are you (there|awake|ready)|who are you|what can you do|how are you|test)\b[\s\S]{0,40}$/i;
+
+/** Short enough that a greeting cannot be hiding a real request behind it. */
+const SMALLTALK_CHARS = 60;
+
+export function looksConversational(task: string): boolean {
+  return task.trim().length <= SMALLTALK_CHARS && SMALLTALK.test(task);
+}
+
 const LONG_PASTE = 8_000;
 
 function countHits(task: string, re: RegExp): number {
@@ -88,6 +103,7 @@ export function classifyHeuristic(task: string): Classification {
     difficulty,
     rationale: `Reads like ${JOB[category]}, and a ${SIZE[difficulty]} one.`,
     via: 'heuristic',
+    conversational: looksConversational(task),
   };
 }
 
@@ -104,7 +120,12 @@ function prompt(task: string): string {
       : task;
   return `Classify the task below for a model router.
 Reply with ONLY this JSON object, nothing before or after it, and no markdown fences:
-{"category":"coding|agentic-coding|reasoning|writing|chat|long-context","difficulty":"trivial|easy|medium|hard","rationale":"under 12 words"}
+{"category":"coding|agentic-coding|reasoning|writing|chat|long-context","difficulty":"trivial|easy|medium|hard","conversational":true|false,"rationale":"under 12 words"}
+
+Set conversational to true only when the person is talking to the assistant
+rather than asking for work: a greeting, a thank you, a yes or no, asking if it
+is there or what it can do. Anything with something to produce, however small,
+is false. The text may be in any language.
 
 Task:
 ${body}`;
@@ -126,6 +147,7 @@ export function parseClassification(raw: string): Classification | null {
     difficulty: obj.difficulty,
     rationale: rationale || 'Classified by a cheap model.',
     via: 'model',
+    conversational: obj.conversational === true,
   };
 }
 

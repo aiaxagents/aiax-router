@@ -162,6 +162,10 @@ function Turn({
                     {task.rounds === 1 ? 'round' : 'rounds'}.
                   </small>
                 </span>
+              ) : task.rounds === 0 ? (
+                // Small talk never went near the review panel, so there is no
+                // verdict to report and nothing to warn about.
+                null
               ) : (
                 <span className="verdict">
                   <small>Nobody was free to check this, so treat it as unchecked.</small>

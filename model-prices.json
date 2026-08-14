@@ -19,6 +19,7 @@
     "grok": {
       "default": { "input": 3, "output": 15 },
       "models": {
+        "grok-4.6": { "input": 3, "output": 15 },
         "grok-4.5": { "input": 3, "output": 15 }
       }
     },

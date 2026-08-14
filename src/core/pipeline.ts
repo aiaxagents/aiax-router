@@ -114,6 +114,14 @@ function waves(subtasks: Subtask[]): Subtask[][] {
 
 // --- stage prompts -----------------------------------------------------------
 
+/** No JSON contract here: the reply is shown to the person exactly as it comes back. */
+function conversationalPrompt(task: string): string {
+  return `Someone is talking to you in a chat app. Reply in one or two short sentences, warmly and plainly, in the same language they used. No lists, no headings, no code, no preamble about what you are about to do.
+
+They said:
+${task}`;
+}
+
 function intentPrompt(task: string, memory = ''): string {
   const known = memory
     ? `\nWhat is already known about this person and their work, from earlier tasks. Respect it, and never ask about anything it already answers:\n${memory}\n`
@@ -311,6 +319,41 @@ export async function* runPipeline(
     opts.classification ?? (await classify(task, available, table, opts.adapters));
   const lead: Candidate | undefined = bestCandidate(available, table, classification.category);
   const leadEffort = routingOverride()?.effort ?? EFFORT_BY_DIFFICULTY[classification.difficulty];
+
+  // Small talk has no deliverable, so planning it, splitting it and putting five
+  // judges on it is pure ceremony. One model, one pass, straight back.
+  if (classification.conversational) {
+    state.intent = task;
+    state.acceptanceCriteria = ['A short, friendly reply.'];
+    let reply = '';
+    if (lead) {
+      const { ok, text } = await ask(lead, conversationalPrompt(task), {
+        effort: 'low',
+        timeoutMs: opts.timeoutMs,
+        adapters: opts.adapters,
+        cwd: opts.cwd,
+        role: 'planning',
+      });
+      if (ok) reply = text.trim();
+    }
+    if (!reply) {
+      // Nothing was free to answer, so the pipeline is the wrong tool to fail in.
+      reply = 'I am here. Tell me what you would like done.';
+    }
+    state.status = 'done';
+    state.results.push({
+      id: 'reply',
+      title: 'Reply',
+      provider: lead?.provider ?? '',
+      model: lead?.model ?? '',
+      ok: true,
+      summary: oneLine(reply),
+      text: reply,
+    });
+    saveTaskState(state);
+    yield { type: 'done', ok: true, answer: reply, state, outcome: null, rounds: 0 };
+    return;
+  }
 
   const askLead = async (prompt: string): Promise<Record<string, unknown> | null> => {
     if (!lead) return null;

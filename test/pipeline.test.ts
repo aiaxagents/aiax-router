@@ -299,3 +299,31 @@ describe('runPipeline', () => {
     expect(anyPrompt('You are one of five reviewers')).toBe(false);
   });
 });
+
+describe('small talk', () => {
+  it('answers in one pass, with no planning and no review panel', async () => {
+    const { done, lines } = await pipeline({
+      classification: { ...CLASSIFICATION, difficulty: 'trivial', conversational: true },
+    });
+
+    expect(done.ok).toBe(true);
+    expect(done.outcome).toBe(null);
+    expect(done.rounds).toBe(0);
+    expect(done.state.status).toBe('done');
+    // The three stages that made a greeting cost a dozen model calls.
+    expect(anyPrompt('You are one of five reviewers')).toBe(false);
+    expect(anyPrompt('Work out what a great result looks like')).toBe(false);
+    expect(anyPrompt('Break the job below')).toBe(false);
+    expect(lines).not.toContain('Five review agents are going over the work.');
+    expect(seen.length).toBe(1);
+  });
+
+  it('still runs the full pipeline for a small but real request', async () => {
+    const { done } = await pipeline({
+      classification: { ...CLASSIFICATION, conversational: false },
+    });
+
+    expect(done.outcome).not.toBe(null);
+    expect(anyPrompt('You are one of five reviewers')).toBe(true);
+  });
+});

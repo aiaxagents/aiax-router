@@ -15,6 +15,13 @@ export interface Classification {
   difficulty: Difficulty;
   rationale: string;
   via: 'model' | 'heuristic';
+  /**
+   * Talking to the router rather than giving it work: a greeting, a thank you,
+   * a question about itself. There is no deliverable to plan, split or review,
+   * so the pipeline answers these in one pass. `chat` cannot stand in for this,
+   * because it is also the fallback category for anything with no keyword hit.
+   */
+  conversational?: boolean;
 }
 
 export interface Candidate {

@@ -96,6 +96,8 @@ export interface ResultMeta {
 }
 
 function footLine(meta: ResultMeta): string {
+  // Zero rounds means the review loop was never entered: small talk, nothing to check.
+  if (meta.score === undefined && meta.rounds === 0) return '';
   if (meta.score === undefined) return 'Nobody was free to check this, so treat it as unchecked.';
   const rounds = meta.rounds ?? 1;
   return `Reviewers gave it ${meta.score} out of 10 after ${rounds} ${rounds === 1 ? 'round' : 'rounds'}.`;
@@ -180,7 +182,7 @@ ${renderMarkdown(markdown)}
 
   <div class="foot">
     <div class="label">Review</div>
-    <p>${escapeHtml(footLine(meta))}</p>
+    ${footLine(meta) ? `<p>${escapeHtml(footLine(meta))}</p>` : ''}
     <div class="label">Files</div>
     <ul>
 ${files || '<li>Only this page.</li>'}

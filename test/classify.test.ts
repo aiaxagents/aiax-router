@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { classify, classifyHeuristic } from '../src/core/classify.js';
+import { classify, classifyHeuristic, looksConversational } from '../src/core/classify.js';
 import { isDead } from '../src/core/usage.js';
 import type { Adapter, AdapterEvent } from '../src/adapters/types.js';
 import type { Candidate, RoutingTable } from '../src/core/types.js';
@@ -135,6 +135,8 @@ describe('classify', () => {
       difficulty: 'easy',
       rationale: 'short poem',
       via: 'model',
+      // Absent from the model's answer means "this is work", never small talk.
+      conversational: false,
     });
   });
 
@@ -201,5 +203,24 @@ describe('classify', () => {
 
     expect(asked).toEqual([]);
     expect(c.via).toBe('heuristic');
+  });
+});
+
+describe('looksConversational', () => {
+  it('catches Norwegian and English small talk', () => {
+    for (const line of ['Er du der?', 'hei!', 'Takk :)', 'hvem er du', 'are you there?', 'hello']) {
+      expect(looksConversational(line)).toBe(true);
+    }
+  });
+
+  it('leaves real requests alone, however short or chatty they open', () => {
+    for (const line of [
+      'Turn my meeting notes into a two page report',
+      'Book a table for six on Friday',
+      'hei, kan du skrive et sammendrag av rapporten jeg sendte deg i går',
+      'fix the bug in the date parser',
+    ]) {
+      expect(looksConversational(line)).toBe(false);
+    }
   });
 });

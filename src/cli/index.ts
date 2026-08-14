@@ -229,7 +229,9 @@ async function runTask(argv: string[]): Promise<number> {
       console.log('Nothing usable came back, so there is no result to show.');
       return 1;
     }
-    if (!ev.outcome || !ev.outcome.reviewed) {
+    if (ev.rounds === 0) {
+      // Small talk: answered in one pass, the review panel was never involved.
+    } else if (!ev.outcome || !ev.outcome.reviewed) {
       console.log('Nobody was free to check this, so treat it as unchecked.');
     } else {
       const pass = ev.outcome.passed ? 'good enough to ship' : 'not all the way there';

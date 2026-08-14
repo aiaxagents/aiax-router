@@ -12,6 +12,8 @@
     "gpt-5.5": { "provider": "codex", "model": "gpt-5.5" },
     "gpt-5.5-high": { "provider": "codex", "model": "gpt-5.5" },
     "gpt-5.5-xhigh": { "provider": "codex", "model": "gpt-5.5" },
+    "grok-4.6": { "provider": "grok", "model": "grok-4.6" },
+    "grok-4.6-high": { "provider": "grok", "model": "grok-4.6" },
     "grok-4.5": { "provider": "grok", "model": "grok-4.5" },
     "kimi-k3": { "provider": "kimi", "model": "kimi-k3" },
     "kimi-k3-instruct": { "provider": "kimi", "model": "kimi-k3" }
