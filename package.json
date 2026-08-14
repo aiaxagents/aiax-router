@@ -1,6 +1,6 @@
 {
   "name": "aiax-router",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Local-first router that gets the best out of the AI subscriptions you already pay for. Picks the right model, reasoning effort and skills for every task, by ROI.",
   "license": "MIT",
   "type": "module",
