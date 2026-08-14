@@ -126,8 +126,9 @@ jobs:
             Local-first router for the AI subscriptions you already pay for.
             Everything runs on your own machine.
 
-            The macOS and Windows builds are unsigned, so the first launch needs
-            the usual "open anyway" step.
+            The macOS build is signed and notarized with Apple, so it opens
+            normally. The Windows build is unsigned, so SmartScreen still asks
+            for "more info" then "run anyway" on the first launch.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
