@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { homedir } from 'node:os';
+import { homedir, userInfo } from 'node:os';
 import { delimiter, join } from 'node:path';
 
 /**
@@ -34,9 +34,21 @@ export function ensureUserPath(): void {
 
 const MARK = '__AIAX_PATH__';
 
+/** The login shell from the passwd database. Windows has none. */
+function userShell(): string {
+  try {
+    return userInfo().shell ?? '';
+  } catch {
+    return '';
+  }
+}
+
 /** The user's login-shell PATH, or '' if the shell would not say. */
 export function loginShellPath(): string {
-  const shell = process.env.SHELL || '/bin/sh';
+  // Some launch contexts hand over no SHELL at all, and /bin/sh reads none of
+  // the rc files where a PATH like ~/.kimi-code/bin is set. The passwd entry is
+  // the same answer the OS itself would give.
+  const shell = process.env.SHELL || userShell() || '/bin/sh';
   // -l loads the profile where PATH is usually set; -i additionally loads rc
   // files (nvm and friends live there), but can misbehave, so it goes first
   // and -l alone is the fallback.

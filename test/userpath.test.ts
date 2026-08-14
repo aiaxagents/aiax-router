@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { parseShellPath } from '../src/core/userpath.js';
+import { userInfo } from 'node:os';
+import { afterEach, describe, expect, it } from 'vitest';
+import { loginShellPath, parseShellPath } from '../src/core/userpath.js';
 
 describe('parseShellPath', () => {
   it('reads a clean marked line', () => {
@@ -20,5 +21,22 @@ describe('parseShellPath', () => {
 
   it('returns nothing when no marker survived', () => {
     expect(parseShellPath('command not found\n')).toBe('');
+  });
+});
+
+describe('loginShellPath', () => {
+  const had = process.env.SHELL;
+  afterEach(() => {
+    if (had === undefined) delete process.env.SHELL;
+    else process.env.SHELL = had;
+  });
+
+  it.skipIf(process.platform === 'win32')('asks the passwd shell when SHELL is missing', () => {
+    process.env.SHELL = userInfo().shell ?? '/bin/sh';
+    const withShell = loginShellPath();
+    delete process.env.SHELL;
+    // Not just "non-empty": /bin/sh reads no rc files, so falling back to it
+    // would quietly return a shorter PATH than the user's own shell gives.
+    expect(loginShellPath()).toBe(withShell);
   });
 });
