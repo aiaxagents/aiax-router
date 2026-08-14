@@ -77,6 +77,37 @@ jobs:
 
       - run: pnpm test
 
+      # Without Developer ID signing and notarization, Gatekeeper tells every
+      # downloader the app "is damaged and can't be opened". The secrets are:
+      #   APPLE_CERTIFICATE            base64 of the Developer ID Application .p12
+      #   APPLE_CERTIFICATE_PASSWORD   the .p12 password
+      #   APPLE_SIGNING_IDENTITY       e.g. "Developer ID Application: ... (TEAMID)"
+      #   APPLE_ID / APPLE_PASSWORD    Apple ID + app-specific password (notarization)
+      #   APPLE_TEAM_ID                the 10-character team id
+      # Only exported when present, so the build still works (unsigned) without
+      # them. tauri-action/the bundler picks these up from the environment.
+      - name: macOS signing environment
+        if: matrix.platform == 'macos-latest'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE" ]; then
+            echo "No signing secrets; building unsigned."
+            exit 0
+          fi
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            {
+              echo "$name<<AIAX_EOF"
+              printenv "$name"
+              echo "AIAX_EOF"
+            } >> "$GITHUB_ENV"
+          done
+
       - uses: tauri-apps/tauri-action@v0
         id: tauri
         env:
