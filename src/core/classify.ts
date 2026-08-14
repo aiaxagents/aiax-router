@@ -1,7 +1,7 @@
 import { adapters as realAdapters } from '../adapters/index.js';
 import type { Adapter } from '../adapters/types.js';
 import { CATEGORIES, ask, cheapestCandidate, firstJsonObject } from './ask.js';
-import type { Category, Classification, Difficulty, RoutingTable } from './types.js';
+import type { Category, Classification, Difficulty, RoutingTable, Weight } from './types.js';
 
 /** One signal per category. Most hits wins; ties go to the earlier entry. */
 const SIGNALS: { category: Category; re: RegExp }[] = [
@@ -43,6 +43,29 @@ const SMALLTALK_CHARS = 60;
 
 export function looksConversational(task: string): boolean {
   return task.trim().length <= SMALLTALK_CHARS && SMALLTALK.test(task);
+}
+
+/**
+ * A question the person wants answered, not a piece of work they want made.
+ * Deliberately narrow: this only runs when no model is around to judge, and
+ * guessing `full` costs some time, while guessing `light` skips the review that
+ * would have caught a bad answer. So the doubt goes to `full`.
+ */
+const QUESTION =
+  /^\s*(hva|hvem|hvor|hvorfor|hvordan|når|kan du (finne|fortelle|si|anbefale|foreslå)|hjelp meg (å )?(finne|velge)|what|which|who|where|why|how|when|can you (find|tell|recommend|suggest)|should i)\b/i;
+
+/** Longer than this and it is carrying requirements, not asking a question. */
+const LIGHT_CHARS = 240;
+
+export function looksLight(task: string, category: Category): boolean {
+  if (category !== 'chat' && category !== 'reasoning') return false;
+  const text = task.trim();
+  return text.length <= LIGHT_CHARS && (QUESTION.test(text) || text.endsWith('?'));
+}
+
+function pickWeight(task: string, category: Category): Weight {
+  if (looksConversational(task)) return 'conversational';
+  return looksLight(task, category) ? 'light' : 'full';
 }
 
 const LONG_PASTE = 8_000;
@@ -103,11 +126,12 @@ export function classifyHeuristic(task: string): Classification {
     difficulty,
     rationale: `Reads like ${JOB[category]}, and a ${SIZE[difficulty]} one.`,
     via: 'heuristic',
-    conversational: looksConversational(task),
+    weight: pickWeight(task, category),
   };
 }
 
 const DIFFICULTIES: Difficulty[] = ['trivial', 'easy', 'medium', 'hard'];
+const WEIGHTS: Weight[] = ['conversational', 'light', 'full'];
 
 /** Above this the classifier only sees the head of the task; length still reaches the heuristic. */
 const PROMPT_CHARS = 4_000;
@@ -120,12 +144,20 @@ function prompt(task: string): string {
       : task;
   return `Classify the task below for a model router.
 Reply with ONLY this JSON object, nothing before or after it, and no markdown fences:
-{"category":"coding|agentic-coding|reasoning|writing|chat|long-context","difficulty":"trivial|easy|medium|hard","conversational":true|false,"rationale":"under 12 words"}
+{"category":"coding|agentic-coding|reasoning|writing|chat|long-context","difficulty":"trivial|easy|medium|hard","weight":"conversational|light|full","rationale":"under 12 words"}
 
-Set conversational to true only when the person is talking to the assistant
-rather than asking for work: a greeting, a thank you, a yes or no, asking if it
-is there or what it can do. Anything with something to produce, however small,
-is false. The text may be in any language.
+weight says how much machinery this has earned, which is a different question
+from how hard it is. The text may be in any language.
+  conversational - a greeting, a thank you, a yes or no, asking if it is there
+    or what it can do. There is nothing to answer at all. If the text asks
+    something that has a real answer, however small, it is light and not this.
+  light - one good answer settles it, and they want the answer itself: a
+    question, a recommendation, a quick explanation, a short list. Nobody is
+    going to open it again tomorrow.
+  full - something that will be used or read as a piece of work: a document, a
+    code change, a plan, an analysis, anything with requirements to meet or
+    several parts to get right.
+When you are torn between light and full, choose full.
 
 Task:
 ${body}`;
@@ -147,7 +179,9 @@ export function parseClassification(raw: string): Classification | null {
     difficulty: obj.difficulty,
     rationale: rationale || 'Classified by a cheap model.',
     via: 'model',
-    conversational: obj.conversational === true,
+    // An unreadable weight means the full pipeline, which is the answer that
+    // costs time rather than the one that skips the checking.
+    weight: WEIGHTS.includes(obj?.weight) ? obj.weight : 'full',
   };
 }
 
@@ -171,5 +205,13 @@ export async function classify(
     adapters: list,
   });
   if (!ok) return classifyHeuristic(task);
-  return parseClassification(text) ?? classifyHeuristic(task);
+  const parsed = parseClassification(text);
+  if (!parsed) return classifyHeuristic(task);
+  // The chat path answers in a sentence or two and nothing follows it, so a
+  // real question landing there comes back as a shrug. A cheap model on low
+  // effort gets this wrong, so it only gets to call something small talk when
+  // the text reads as small talk offline too. Everything else it waved away is
+  // at least worth one good answer.
+  if (parsed.weight === 'conversational' && !looksConversational(task)) parsed.weight = 'light';
+  return parsed;
 }

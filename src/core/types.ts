@@ -10,18 +10,27 @@ export type Difficulty = 'trivial' | 'easy' | 'medium' | 'hard';
 
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh';
 
+/**
+ * How much machinery the input has earned. `category` says what kind of work it
+ * is and `difficulty` says how hard, but neither says how much ceremony the
+ * person wants, and the two are not the same question: a greeting and a two
+ * page report can both read as easy writing.
+ *
+ * - `conversational`: talking to the router. Nothing to produce at all.
+ * - `light`: one good answer settles it. The person wants the answer, not a
+ *   work product, so it goes to the strongest model with the right skills in
+ *   one pass. No splitting, no review panel, no revision loop.
+ * - `full`: something that will be used or read as a work product, and worth
+ *   planning, splitting and reviewing.
+ */
+export type Weight = 'conversational' | 'light' | 'full';
+
 export interface Classification {
   category: Category;
   difficulty: Difficulty;
   rationale: string;
   via: 'model' | 'heuristic';
-  /**
-   * Talking to the router rather than giving it work: a greeting, a thank you,
-   * a question about itself. There is no deliverable to plan, split or review,
-   * so the pipeline answers these in one pass. `chat` cannot stand in for this,
-   * because it is also the fallback category for anything with no keyword hit.
-   */
-  conversational?: boolean;
+  weight: Weight;
 }
 
 export interface Candidate {

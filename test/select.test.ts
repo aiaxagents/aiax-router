@@ -9,6 +9,7 @@ import type {
   Classification,
   Difficulty,
   RoutingTable,
+  Weight,
 } from '../src/core/types.js';
 
 // select() honours the routing override in config.json, so these tests must
@@ -41,8 +42,12 @@ function table(categories: Partial<Record<Category, Candidate[]>>): RoutingTable
   };
 }
 
-function classification(category: Category, difficulty: Difficulty): Classification {
-  return { category, difficulty, rationale: 'fixture', via: 'heuristic' };
+function classification(
+  category: Category,
+  difficulty: Difficulty,
+  weight: Weight = 'full',
+): Classification {
+  return { category, difficulty, rationale: 'fixture', via: 'heuristic', weight };
 }
 
 const full = () => 1;
@@ -179,6 +184,40 @@ describe('select', () => {
     });
 
     // Hard would ask for high effort; haiku tops out at medium.
+    expect(decision?.effort).toBe('medium');
+  });
+
+  it('spends the best model on a light question instead of the best deal', () => {
+    // Same task, same table. Only the weight differs.
+    const deal = select({
+      classification: classification('chat', 'easy'),
+      table: table({ chat: [OPUS, SOL, HAIKU, FLASH] }),
+      available: allOf('claude', 'codex', 'kimi'),
+      headroom: full,
+    });
+    const light = select({
+      classification: classification('chat', 'easy', 'light'),
+      table: table({ chat: [OPUS, SOL, HAIKU, FLASH] }),
+      available: allOf('claude', 'codex', 'kimi'),
+      headroom: full,
+    });
+
+    expect(deal?.model).toBe('flash');
+    expect(light?.model).toBe('sol');
+    // Easy asks for low effort, but nothing checks a light answer afterwards.
+    expect(deal?.effort).toBe('low');
+    expect(light?.effort).toBe('medium');
+    expect(light?.rationale).toContain('one pass is all it gets');
+  });
+
+  it('still keeps a light question inside what the model supports', () => {
+    const decision = select({
+      classification: classification('chat', 'hard', 'light'),
+      table: table({ chat: [HAIKU] }),
+      available: allOf('claude'),
+      headroom: full,
+    });
+
     expect(decision?.effort).toBe('medium');
   });
 

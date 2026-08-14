@@ -68,6 +68,7 @@ const CLASSIFICATION: Classification = {
   difficulty: 'easy',
   rationale: 'fixture',
   via: 'heuristic',
+  weight: 'full',
 };
 
 const INTENT = {
@@ -327,7 +328,7 @@ describe('runPipeline', () => {
 describe('small talk', () => {
   it('answers in one pass, with no planning and no review panel', async () => {
     const { done, lines } = await pipeline({
-      classification: { ...CLASSIFICATION, difficulty: 'trivial', conversational: true },
+      classification: { ...CLASSIFICATION, difficulty: 'trivial', weight: 'conversational' },
     });
 
     expect(done.ok).toBe(true);
@@ -344,10 +345,55 @@ describe('small talk', () => {
 
   it('still runs the full pipeline for a small but real request', async () => {
     const { done } = await pipeline({
-      classification: { ...CLASSIFICATION, conversational: false },
+      classification: { ...CLASSIFICATION, weight: 'full' },
     });
 
     expect(done.outcome).not.toBe(null);
     expect(anyPrompt('You are one of five reviewers')).toBe(true);
+  });
+});
+
+describe('a light question', () => {
+  const light = { ...CLASSIFICATION, weight: 'light' as const };
+
+  it('answers in one pass: no splitting, no rewrite, no review panel', async () => {
+    const { done, lines } = await pipeline({ classification: light });
+
+    expect(done.ok).toBe(true);
+    expect(done.rounds).toBe(0);
+    expect(done.outcome).toBe(null);
+    expect(done.state.status).toBe('done');
+    expect(anyPrompt('Split the job below')).toBe(false);
+    expect(anyPrompt('Rewrite the instruction below')).toBe(false);
+    expect(anyPrompt('Turn the finished pieces below')).toBe(false);
+    expect(anyPrompt('You are one of five reviewers')).toBe(false);
+    expect(lines).not.toContain('Five review agents are going over the work.');
+    // One model call produces the answer. The only other one is the cheap
+    // memory pass every task ends with, which is what learns the person's
+    // standing context and never blocks the answer being right.
+    const answering = seen.filter((s) => s.prompt.includes('Answer the question below properly'));
+    expect(answering).toHaveLength(1);
+    expect(seen).toHaveLength(2);
+  });
+
+  it('tells the model nothing checks it afterwards', async () => {
+    await pipeline({ classification: light });
+
+    expect(anyPrompt('Nobody checks this after you')).toBe(true);
+  });
+
+  it('goes to the strongest model rather than the best-value one', async () => {
+    const { done } = await pipeline({ classification: light });
+    const answer = done.state.results[0];
+
+    // FLASH wins on value and OPUS on score, so the pick names the tier.
+    expect(`${answer.provider}/${answer.model}`).toBe('claude/opus');
+  });
+
+  it('keeps the whole answer, not a summary of it', async () => {
+    const { done } = await pipeline({ classification: light });
+
+    expect(done.answer).toBe('WORK FROM claude');
+    expect(done.state.results[0].text).toBe('WORK FROM claude');
   });
 });

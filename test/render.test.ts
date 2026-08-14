@@ -71,6 +71,22 @@ describe('renderMarkdown links', () => {
     expect(html).toContain('[tap here]');
   });
 
+  it('sets a lone pair of stars in italics without eating the bold ones', () => {
+    const html = renderMarkdown('Grunnen er **nedkjølingen**, ikke *Bacillus cereus* i seg selv.');
+    expect(html).toContain('<b>nedkjølingen</b>');
+    expect(html).toContain('<i>Bacillus cereus</i>');
+    expect(html).not.toContain('*');
+  });
+
+  it('makes a phone number and an address clickable, in place', () => {
+    const html = renderMarkdown('Ring [984 80 232](tel:+4798480232) eller [oss](mailto:a@b.no).');
+    expect(html).toContain('<a href="tel:+4798480232">984 80 232</a>');
+    expect(html).toContain('<a href="mailto:a@b.no">oss</a>');
+    // A dialer or a mail client takes over the click, so a new tab would only
+    // leave a blank one behind.
+    expect(html).not.toContain('tel:+4798480232" target');
+  });
+
   it('cannot be talked into breaking out of the href', () => {
     const html = renderMarkdown('[x](https://a.no/"onmouseover="alert(1))');
     expect(html).not.toContain('onmouseover="alert');

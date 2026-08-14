@@ -17,13 +17,17 @@ function inline(text: string): string {
     escapeHtml(text)
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-      // Escaping ran first, so the href here holds no quote that could break
-      // out of the attribute, and only the two schemes a person would click
-      // are let through. Everything else stays the characters the model wrote.
+      // Bold is gone by now, so a lone pair of stars is italics and not half of it.
+      .replace(/\*([^*\n]+)\*/g, '<i>$1</i>')
+      // Escaping ran first, so the href here holds no quote that could break out
+      // of the attribute, and only the schemes a person would click are let
+      // through. Everything else stays the characters the model wrote.
       .replace(
         /\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/gi,
         '<a href="$2" target="_blank" rel="noreferrer noopener">$1</a>',
       )
+      // An address or a phone number opens in place, so no new tab for these.
+      .replace(/\[([^\]\n]+)\]\(((?:mailto:|tel:)[^)\s]+)\)/gi, '<a href="$2">$1</a>')
   );
 }
 

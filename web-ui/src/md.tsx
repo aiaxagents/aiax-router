@@ -75,11 +75,24 @@ export function Markdown({ text }: { text: string }) {
 }
 
 /** Bold, code and links. Anything else stays the plain characters the model wrote. */
+/**
+ * The only schemes a person would click, and the ones an answer to a question
+ * actually carries: a site, an address, a phone number. Anything else,
+ * javascript: above all, falls through and shows as the characters the model
+ * wrote.
+ */
+const CLICKABLE = /^(https?:\/\/|mailto:|tel:)/i;
+
 function inline(text: string): ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]\n]+\]\([^)\s]+\))/g).filter(Boolean);
+  // Bold comes first in the alternation so a ** pair is never read as two
+  // italics with nothing between them.
+  const parts = text
+    .split(/(\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`|\[[^\]\n]+\]\([^)\s]+\))/g)
+    .filter(Boolean);
   if (parts.length === 1) return text;
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) return <b key={i}>{part.slice(2, -2)}</b>;
+    if (part.startsWith('*') && part.endsWith('*')) return <i key={i}>{part.slice(1, -1)}</i>;
     if (part.startsWith('`') && part.endsWith('`')) {
       return (
         <code className="path" key={i}>
@@ -88,11 +101,18 @@ function inline(text: string): ReactNode {
       );
     }
     const link = /^\[([^\]\n]+)\]\(([^)\s]+)\)$/.exec(part);
-    // Only the two schemes a person would click. Anything else, javascript:
-    // above all, falls through and shows as the characters the model wrote.
-    if (link && /^https?:\/\//i.test(link[2])) {
+    if (link && CLICKABLE.test(link[2])) {
+      // A phone number opens the dialer in place; a new tab would leave a blank
+      // one behind.
+      const away = /^https?:/i.test(link[2]);
       return (
-        <a className="link" href={link[2]} target="_blank" rel="noreferrer noopener" key={i}>
+        <a
+          className="link"
+          href={link[2]}
+          target={away ? '_blank' : undefined}
+          rel={away ? 'noreferrer noopener' : undefined}
+          key={i}
+        >
           {link[1]}
         </a>
       );

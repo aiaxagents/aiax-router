@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { classify, classifyHeuristic, looksConversational } from '../src/core/classify.js';
+import { classify, classifyHeuristic, looksConversational, looksLight } from '../src/core/classify.js';
 import { isDead } from '../src/core/usage.js';
 import type { Adapter, AdapterEvent } from '../src/adapters/types.js';
 import type { Candidate, RoutingTable } from '../src/core/types.js';
@@ -136,7 +136,7 @@ describe('classify', () => {
       rationale: 'short poem',
       via: 'model',
       // Absent from the model's answer means "this is work", never small talk.
-      conversational: false,
+      weight: 'full',
     });
   });
 
@@ -198,6 +198,32 @@ describe('classify', () => {
     expect(isDead('kimi')).toBe(true);
   });
 
+  it('does not let the classifier wave a real question off as small talk', async () => {
+    // Observed: kimi on low effort called this conversational, and the chat path
+    // answers a takeaway question in one friendly sentence with nothing in it.
+    const task = 'hva er beste takeaway i Molde i kveld? gjerne med telefonnummer så jeg kan ringe';
+    const c = await classify(task, ALL, table([FLASH]), [
+      answering(
+        'kimi',
+        says('{"category":"chat","difficulty":"easy","weight":"conversational","rationale":"chit chat"}'),
+      ),
+    ]);
+
+    expect(c.via).toBe('model');
+    expect(c.weight).toBe('light');
+  });
+
+  it('still lets it call actual small talk small talk', async () => {
+    const c = await classify('Er du der?', ALL, table([FLASH]), [
+      answering(
+        'kimi',
+        says('{"category":"chat","difficulty":"trivial","weight":"conversational","rationale":"greeting"}'),
+      ),
+    ]);
+
+    expect(c.weight).toBe('conversational');
+  });
+
   it('does not spend an expensive model on classifying', async () => {
     const c = await classify('write a haiku', ALL, table([SOL]), [answering('codex', says('{}'))]);
 
@@ -222,5 +248,49 @@ describe('looksConversational', () => {
     ]) {
       expect(looksConversational(line)).toBe(false);
     }
+  });
+});
+
+describe('weight, offline', () => {
+  const weightOf = (task: string): string => classifyHeuristic(task).weight;
+
+  it('calls a question a light one', () => {
+    for (const line of [
+      'kan du finne ut hva jeg bør spise i dag? noe takeaway i Molde',
+      'hvor lenge holder kokt ris i kjøleskapet?',
+      'what is a good pairing for a smoked trout?',
+      'should i take the train or drive to Trondheim',
+    ]) {
+      expect(weightOf(line), line).toBe('light');
+    }
+  });
+
+  it('leaves anything with a deliverable on the full path', () => {
+    for (const line of [
+      'Turn my meeting notes into a two page report',
+      'Write three subject lines for the newsletter',
+      'fix the bug in the date parser',
+      'Clean up the CSV export from our webshop',
+    ]) {
+      expect(weightOf(line), line).toBe('full');
+    }
+  });
+
+  it('keeps small talk out of the light path', () => {
+    expect(weightOf('Er du der?')).toBe('conversational');
+    expect(weightOf('hvem er du')).toBe('conversational');
+  });
+
+  it('sends a question carrying requirements down the full path', () => {
+    // A question mark is not a promise that one answer settles it.
+    const long = `hvordan bør vi legge opp lanseringen? ${'Vi trenger en plan for hver uke. '.repeat(8)}`;
+    expect(long.length).toBeGreaterThan(240);
+    expect(weightOf(long)).toBe('full');
+  });
+
+  it('never calls a coding or writing job light', () => {
+    expect(looksLight('hvordan fikser jeg denne testen?', 'coding')).toBe(false);
+    expect(looksLight('hva bør overskriften være?', 'writing')).toBe(false);
+    expect(looksLight('hva bør jeg spise?', 'chat')).toBe(true);
   });
 });

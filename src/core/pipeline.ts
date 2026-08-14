@@ -115,6 +115,17 @@ function waves(subtasks: Subtask[]): Subtask[][] {
 // --- stage prompts -----------------------------------------------------------
 
 /** No JSON contract here: the reply is shown to the person exactly as it comes back. */
+function lightPrompt(task: string, skills: Skill[]): string {
+  return `${skillPreamble(skills)}Answer the question below properly, in the language it was asked in.
+
+Nobody checks this after you, so say plainly where you are unsure or could not verify something, rather than putting a guess in the same voice as a fact.
+
+Give the answer itself, with no preamble about what you are about to do. Lay it out to be read: short paragraphs, a short list where a list genuinely helps, bold on the thing that matters most, and headings only if there are really several sections. Where a link, an address or a phone number belongs in the answer, put it there.
+
+The question:
+${task}`;
+}
+
 function conversationalPrompt(task: string): string {
   return `Someone is talking to you in a chat app. Reply in one or two short sentences, warmly and plainly, in the same language they used. No lists, no headings, no code, no preamble about what you are about to do.
 
@@ -228,6 +239,8 @@ function classificationOf(subtask: Subtask): Classification {
     difficulty: subtask.difficulty,
     rationale: 'Set when the job was split up.',
     via: 'model',
+    // A step of a full job is part of a work product, whatever its own size.
+    weight: 'full',
   };
 }
 
@@ -322,7 +335,7 @@ export async function* runPipeline(
 
   // Small talk has no deliverable, so planning it, splitting it and putting five
   // judges on it is pure ceremony. One model, one pass, straight back.
-  if (classification.conversational) {
+  if (classification.weight === 'conversational') {
     state.intent = task;
     state.acceptanceCriteria = ['A short, friendly reply.'];
     let reply = '';
@@ -352,6 +365,65 @@ export async function* runPipeline(
     });
     saveTaskState(state);
     yield { type: 'done', ok: true, answer: reply, state, outcome: null, rounds: 0 };
+    return;
+  }
+
+  // One good answer settles this. Splitting it, briefing a model on its own
+  // rewritten instruction and then convening five judges to argue about a
+  // recommendation is where the twenty minutes went, and none of it made the
+  // answer better. So the quality is bought where it shows: the strongest model
+  // this category has, the skills that fit, and one pass.
+  if (classification.weight === 'light') {
+    const skills = matchSkills(task, classification.category);
+    state.intent = task;
+    state.acceptanceCriteria = ['One answer that settles the question.'];
+    for (const skill of skills) yield progress(`Using skill: ${skill.name}.`);
+
+    let answer = '';
+    let provider = '';
+    let model = '';
+    let ok = false;
+    for await (const ev of runWithFailover(lightPrompt(task, skills), {
+      adapters: opts.adapters,
+      table,
+      available,
+      classification,
+      cwd: opts.cwd,
+      timeoutMs: opts.timeoutMs,
+    })) {
+      if (ev.type === 'decision') {
+        provider = ev.decision.provider;
+        model = ev.decision.model;
+        if (ev.attempt === 1) yield progress(`${named(provider)} is answering this one.`);
+      } else if (ev.type === 'failover') {
+        yield progress(ev.message);
+      } else if (ev.type === 'text') answer += ev.chunk;
+      else if (ev.type === 'result') {
+        ok = ev.ok;
+        if (ev.text) answer = ev.text;
+      }
+    }
+    answer = answer.trim();
+
+    if (!ok || !answer) {
+      state.status = 'needs-work';
+      saveTaskState(state);
+      yield { type: 'done', ok: false, answer: '', state, outcome: null, rounds: 0 };
+      return;
+    }
+    state.status = 'done';
+    state.results.push({
+      id: 'answer',
+      title: 'The answer',
+      provider,
+      model,
+      ok: true,
+      summary: oneLine(answer),
+      text: answer,
+    });
+    saveTaskState(state);
+    await distillEpisode(state, { available, table, adapters: opts.adapters });
+    yield { type: 'done', ok: true, answer, state, outcome: null, rounds: 0 };
     return;
   }
 

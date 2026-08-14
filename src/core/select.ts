@@ -42,6 +42,10 @@ function clampEffort(want: Effort, max: Effort | undefined): Effort {
   return EFFORT_ORDER.indexOf(want) > EFFORT_ORDER.indexOf(max) ? max : want;
 }
 
+function highest(a: Effort, b: Effort): Effort {
+  return EFFORT_ORDER.indexOf(a) >= EFFORT_ORDER.indexOf(b) ? a : b;
+}
+
 /** Quality per unit of subscription burned, nudged by how much quota is left. */
 function roi(c: Candidate, headroom: number): number {
   const spend = c.tokensPerTask * Math.max(c.costWeight, 0.25);
@@ -62,6 +66,10 @@ export function select(input: {
 }): Decision | null {
   const { classification, table, available, headroom } = input;
   const { category, difficulty } = classification;
+  // Light work gets one pass and nothing checking it afterwards, so the quality
+  // has to come from the model. One call to the best beats a bargain plus a
+  // review panel that was never going to run.
+  const wantStrongest = classification.weight === 'light';
 
   // A pinned choice beats every calculation, as long as that tool can take work.
   const pinned = routingOverride();
@@ -87,14 +95,19 @@ export function select(input: {
 
   // Below the bar we are already compromising, so take the strongest model
   // rather than the best deal.
+  const byScore = belowBar || wantStrongest;
   const sorted = [...ranked].sort((a, b) =>
-    belowBar ? b.score - a.score : roi(b, headroom(b.provider)) - roi(a, headroom(a.provider)),
+    byScore ? b.score - a.score : roi(b, headroom(b.provider)) - roi(a, headroom(a.provider)),
   );
 
   const best = sorted[0];
-  const effort = clampEffort(EFFORT_BY_DIFFICULTY[difficulty], best.maxEffort);
+  // Nothing follows a light answer, so it is worth thinking about rather than
+  // dashing off, even when the question itself is an easy one.
+  const want = wantStrongest ? highest(EFFORT_BY_DIFFICULTY[difficulty], 'medium') : EFFORT_BY_DIFFICULTY[difficulty];
+  const effort = clampEffort(want, best.maxEffort);
 
   let rationale = `${SIZE[difficulty]} ${JOB[category]}, so this goes to ${best.provider}/${best.model} on ${effort} effort`;
+  if (wantStrongest) rationale += ', the strongest here, because one pass is all it gets';
   if (belowBar) rationale += ', the best available, below the ideal bar';
   if (outOfQuota) rationale += ', and every provider is low on quota';
 
